@@ -1,0 +1,403 @@
+lang:compiler:disableError:NEGATION_RECURSION[]=true.
+lang:compiler:disableWarning:NEGATION_RECURSION[]=true.
+lang:compiler:disableWarning:SPECIFIC_STARRED_EDGE_IN_SAFETY_GRAPH_CYCLE[]=true.
+
+/**** VarPointsToVar ****/
+Constraint(empty), EmptyConstraint[] = empty,
+VarPointsToVar(empty, var1, var2, method) <-
+	AssignVarToVar(var2, var1, method).
+
+VarPointsToVar(c, var1, var2, method) <-
+	AssignVarToVar(var3, var1, method),
+	VarPointsToVar(c, var3, var2, method).
+
+VarPointsToVarAux(c1, c2, var1, var2, method) <-
+	VarFieldPointsToVar(c1, var3, field, var2, method),
+	VarPointsToVarField(c2, var1, var3, field, method).
+
+VarPointsToVarAux(c1, c2, var1, var2, method) <-
+	HeapFieldPointsToVar(c1, heap, field, var2, method),
+	VarPointsToHeapField(c2, var1, heap, field, method).
+
+/**** VarPointsToVarField ****/
+Constraint(empty), EmptyConstraint[] = empty,
+VarPointsToVarField(empty, var1, var2, field2, method) <-
+	AssignFieldToVar(var2, field2, var1, method).
+
+VarPointsToVarFieldAux(c1, c2, var1, var2, field2, method) <-
+	VarPointsToVar(c1, var1, var3, method),
+	VarPointsToVarField(c2, var3, var2, field2, method).
+
+VarPointsToVarFieldAux(c1, c2, var1, var2, field2, method) <-
+	VarPointsToVarField(c1, var1, var3, field3, method),
+	VarFieldPointsToVarField(c2, var3, field3, var2, field2, method).
+
+VarPointsToVarFieldAux(c1, c2, var1, var2, field2, method) <-
+	VarPointsToHeapField(c1, var1, heap3, field3, method),
+	HeapFieldPointsToVarField(c2, heap3, field3, var2, field2, method).
+
+/**** VarPointsToHeap ****/
+Constraint(empty), EmptyConstraint[] = empty,
+VarPointsToHeap(empty, var, heap, method) <-
+	AssignHeapToVar(heap, var, method).
+
+VarPointsToHeapAux(c1, c2, var1, heap2, method) <-
+	VarPointsToVar(c1, var1, var3, method),
+	VarPointsToHeap(c2, var3, heap2, method).
+
+VarPointsToHeapAux(c1, c2, var1, heap2, method) <-
+	VarPointsToVarField(c1, var1, var3, field3, method),
+	VarFieldPointsToHeap(c2, var3, field3, heap2, method).
+
+VarPointsToHeapAux(c1, c2, var1, heap2, method) <-
+	VarPointsToHeapField(c1, var1, heap3, field3, method),
+	HeapFieldPointsToHeap(c2, heap3, field3, heap2, method).
+
+/**** VarPointsToHeapField ****/
+VarPointsToHeapFieldAux(c1, c2, var1, heap2, field2, method) <-
+	VarPointsToVar(c1, var1, var3, method),
+	VarPointsToHeapField(c2, var3, heap2, field2, method).
+
+VarPointsToHeapFieldAux(c1, c2, var1, heap2, field2, method) <-
+	VarPointsToVarField(c1, var1, var3, field3, method),
+	VarFieldPointsToHeapField(c2, var3, field3, heap2, field2, method).
+
+VarPointsToHeapFieldAux(c1, c2, var1, heap2, field2, method) <-
+	VarPointsToHeapField(c1, var1, heap3, field3, method),
+	HeapFieldPointsToHeapField(c2, heap3, field3, heap2, field2, method).
+
+
+/**** VarFieldPointsToVar ****/
+Constraint(empty), EmptyConstraint[] = empty,
+VarFieldPointsToVar(empty, var1, field1, var2, method) <-
+	AssignVarToField(var2, var1, field1, method).
+
+VarFieldPointsToVarAux(c1, c2, var1, field1, var2, method) <-
+	VarFieldPointsToVar(c1, var1, field1, var3, method),
+	VarPointsToVar(c2, var3, var2, method).
+
+VarFieldPointsToVarAux(c1, c2, var1, field1, var2, method) <-
+	VarFieldPointsToVarField(c1, var1, field1, var3, field3, method),
+	VarFieldPointsToVar(c2, var3, field3, var2, method).
+
+VarFieldPointsToVarAux(c1, c2, var1, field1, var2, method) <-
+	VarFieldPointsToHeapField(c1, var1, field1, heap3, field3, method),	
+	HeapFieldPointsToVar(c2, heap3, field3, var2, method).
+
+/**** VarFieldPointsToVarField ****/
+VarFieldPointsToVarFieldAux(c1, c2, var1, field1, var2, field2, method) <-
+	VarFieldPointsToVar(c1, var1, field1, var3, method),
+	VarPointsToVarField(c2, var3, var2, field2, method).
+
+VarFieldPointsToVarFieldAux(c1, c2, var1, field1, var2, field2, method) <-
+	VarFieldPointsToVarField(c1, var1, field1, var3, field3, method),
+	VarFieldPointsToVarField(c2, var3, field3, var2, field2, method).
+
+VarFieldPointsToVarFieldAux(c1, c2, var1, field1, var2, field2, method) <-
+	VarFieldPointsToHeapField(c1, var1, field1, heap3, field3, method),
+	HeapFieldPointsToVarField(c2, heap3, field3, var2, field2, method).
+
+/**** VarFieldPointsToHeap ****/
+VarFieldPointsToHeapAux(c1, c2, var1, field1, heap2, method) <-
+	VarFieldPointsToVar(c1, var1, field1, var3, method),
+	VarPointsToHeap(c2, var3, heap2, method).
+
+VarFieldPointsToHeapAux(c1, c2, var1, field1, heap2, method) <-
+	VarFieldPointsToVarField(c1, var1, field1, var3, field3, method),
+	VarFieldPointsToHeap(c2, var3, field3, heap2, method).
+
+VarFieldPointsToHeapAux(c1, c2, var1, field1, heap2, method) <-
+	VarFieldPointsToHeapField(c1, var1, field1, heap3, field3, method),
+	HeapFieldPointsToHeap(c2, heap3, field3, heap2, method).
+
+/**** VarFieldPointsToHeapField ****/
+VarFieldPointsToHeapFieldAux(c1, c2, var1, field1, heap2, field2, method) <-
+	VarFieldPointsToVar(c1, var1, field1, var3, method),
+	VarPointsToHeapField(c2, var3, heap2, field2, method).
+
+VarFieldPointsToHeapFieldAux(c1, c2, var1, field1, heap2, field2, method) <-
+	VarFieldPointsToVarField(c1, var1, field1, var3, field3, method),
+	VarFieldPointsToHeapField(c2, var3, field3, heap2, field2, method).
+
+VarFieldPointsToHeapFieldAux(c1, c2, var1, field1, heap2, field2, method) <-
+	VarFieldPointsToHeapField(c1, var1, field1, heap3, field3, method),
+	HeapFieldPointsToHeapField(c2, heap3, field3, heap2, field2, method).
+
+
+/**** HeapFieldPointsToVar ****/
+HeapFieldPointsToVarAux(c1, c2, heap1, field1, var2, method) <-
+	VarFieldPointsToVar(c1, var1, field1, var2, method),
+	VarPointsToHeap(c2, var1, heap1, method).
+
+HeapFieldPointsToVarAux(c1, c2, heap1, field1, var2, method) <-
+	HeapFieldPointsToVar(c1, heap1, field1, var3, method),
+	VarPointsToVar(c2, var3, var2, method).
+
+HeapFieldPointsToVarAux(c1, c2, heap1, field1, var2, method) <-
+	HeapFieldPointsToVarField(c1, heap1, field1, var3, field3, method),
+	VarFieldPointsToVar(c2, var3, field3, var2, method).
+
+HeapFieldPointsToVarAux(c1, c2, heap1, field1, var2, method) <-
+	HeapFieldPointsToHeapField(c1, heap1, field1, heap3, field3, method),
+	HeapFieldPointsToVar(c2, heap3, field3, var2, method).
+
+/**** HeapFieldPointsToVarField ****/
+HeapFieldPointsToVarFieldAux(c1, c2, heap1, field1, var2, field2, method) <-
+	VarFieldPointsToVarField(c1, var1, field1, var2, field2, method),
+	VarPointsToHeap(c2, var1, heap1, method).
+
+HeapFieldPointsToVarFieldAux(c1, c2, heap1, field1, var2, field2, method) <-
+	HeapFieldPointsToVar(c1, heap1, field1, var3, method),
+	VarPointsToVarField(c2, var3, var2, field2, method).
+
+HeapFieldPointsToVarFieldAux(c1, c2, heap1, field1, var2, field2, method) <-
+	HeapFieldPointsToVarField(c1, heap1, field1, var3, field3, method),
+	VarFieldPointsToVarField(c2, var3, field3, var2, field2, method).
+
+HeapFieldPointsToVarFieldAux(c1, c2, heap1, field1, var2, field2, method) <-
+	HeapFieldPointsToHeapField(c1, heap1, field1, heap3, field3, method),
+	HeapFieldPointsToVarField(c2, heap3, field3, var2, field2, method).
+
+/**** HeapFieldPointsToHeap ****/
+HeapFieldPointsToHeapAux(c1, c2, heap1, field1, heap2, method) <-
+	VarFieldPointsToHeap(c1, var1, field1, heap2, method),
+	VarPointsToHeap(c2, var1, heap1, method).
+
+HeapFieldPointsToHeapAux(c1, c2, heap1, field1, heap2, method) <-
+	HeapFieldPointsToVar(c1, heap1, field1, var3, method),
+	VarPointsToHeap(c2, var3, heap2, method).
+
+HeapFieldPointsToHeapAux(c1, c2, heap1, field1, heap2, method) <-
+	HeapFieldPointsToVarField(c1, heap1, field1, var3, field3, method),
+	VarFieldPointsToHeap(c2, var3, field3, heap2, method).
+
+HeapFieldPointsToHeapAux(c1, c2, heap1, field1, heap2, method) <-
+	HeapFieldPointsToHeapField(c1, heap1, field1, heap3, field3, method),
+	HeapFieldPointsToHeap(c2, heap3, field3, heap2, method).
+
+/**** HeapFieldPointsToHeapField ****/
+HeapFieldPointsToHeapFieldAux(c1, c2, heap1, field1, heap2, field2, method) <-
+	VarFieldPointsToHeapField(c1, var1, field1, heap2, field2, method),
+	VarPointsToHeap(c2, var1, heap1, method).
+
+HeapFieldPointsToHeapFieldAux(c1, c2, heap1, field1, heap2, field2, method) <-
+	HeapFieldPointsToVar(c1, heap1, field1, var3, method),
+	VarPointsToHeapField(c2, var3, heap2, field2, method).
+
+HeapFieldPointsToHeapFieldAux(c1, c2, heap1, field1, heap2, field2, method) <-
+	HeapFieldPointsToVarField(c1, heap1, field1, var3, field3, method),
+	VarFieldPointsToHeapField(c2, var3, field3, heap2, field2, method).
+
+HeapFieldPointsToHeapFieldAux(c1, c2, heap1, field1, heap2, field2, method) <-
+	HeapFieldPointsToHeapField(c1, heap1, field1, heap3, field3, method),
+	HeapFieldPointsToHeapField(c2, heap3, field3, heap2, field2, method).
+
+
+
+/**************** CONSTRAINT COMPOSITION ****************/
+
+ToCompose(c1, c2) <- VarPointsToVarAux(c1, c2, _, _, _).
+ToCompose(c1, c2) <- VarPointsToVarFieldAux(c1, c2, _, _, _, _).
+ToCompose(c1, c2) <- VarPointsToHeapAux(c1, c2, _, _, _).
+ToCompose(c1, c2) <- VarPointsToHeapFieldAux(c1, c2, _, _, _, _).
+ToCompose(c1, c2) <- VarFieldPointsToVarAux(c1, c2, _, _, _, _).
+ToCompose(c1, c2) <- VarFieldPointsToVarFieldAux(c1, c2, _, _, _, _, _).
+ToCompose(c1, c2) <- VarFieldPointsToHeapAux(c1, c2, _, _, _, _).
+ToCompose(c1, c2) <- VarFieldPointsToHeapFieldAux(c1, c2, _, _, _, _, _).
+ToCompose(c1, c2) <- HeapFieldPointsToVarAux(c1, c2, _, _, _, _).
+ToCompose(c1, c2) <- HeapFieldPointsToVarFieldAux(c1, c2, _, _, _, _, _).
+ToCompose(c1, c2) <- HeapFieldPointsToHeapAux(c1, c2, _, _, _, _).
+ToCompose(c1, c2) <- HeapFieldPointsToHeapFieldAux(c1, c2, _, _, _, _, _).
+
+
+ConstraintComposition[EmptyConstraint[], c] = c <- ToCompose(EmptyConstraint[], c).
+ConstraintComposition[c, EmptyConstraint[]] = c <- ToCompose(c, EmptyConstraint[]).
+ConstraintComposition[c, c] = c <- ToCompose(c, c).
+
+ConstraintComposition[c1, c2] = c3 <-
+	!ConstraintComposition[c1, c2] = _,
+	ConstraintComposition[c2, c1] = c3.
+
+Constraint(c3), CompositeConstraint[c1, c2] = c3,
+ConstraintComposition[c1, c2] = c2 <-
+	!ConstraintComposition[c2, c1] = _,
+	ToCompose(c1, c2), c1 != c2, c1 != EmptyConstraint[], c2 != EmptyConstraint[].
+
+
+VarPointsToVar(c3, var1, var2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarPointsToVarAux(c1, c2, var1, var2, method).
+VarPointsToVarField(c3, var1, var2, field2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarPointsToVarFieldAux(c1, c2, var1, var2, field2, method).
+VarPointsToHeap(c3, var1, heap2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarPointsToHeapAux(c1, c2, var1, heap2, method).
+VarPointsToHeapField(c3, var1, heap2, field2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarPointsToHeapFieldAux(c1, c2, var1, heap2, field2, method).
+VarFieldPointsToVar(c3, var1, field1, var2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarFieldPointsToVarAux(c1, c2, var1, field1, var2, method).
+VarFieldPointsToVarField(c3, var1, field1, var2, field2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarFieldPointsToVarFieldAux(c1, c2, var1, field1, var2, field2, method).
+VarFieldPointsToHeap(c3, var1, field1, heap2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarFieldPointsToHeapAux(c1, c2, var1, field1, heap2, method).
+VarFieldPointsToHeapField(c3, var1, field1, heap2, field2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	VarFieldPointsToHeapFieldAux(c1, c2, var1, field1, heap2, field2, method).
+HeapFieldPointsToVar(c3, heap1, field1, var2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	HeapFieldPointsToVarAux(c1, c2, heap1, field1, var2, method).
+HeapFieldPointsToVarField(c3, heap1, field1, var2, field2, method) <-
+	ConstraintComposition[c1, c2] = c3,	
+	HeapFieldPointsToVarFieldAux(c1, c2, heap1, field1, var2, field2, method).
+HeapFieldPointsToHeap(c3, heap1, field1, heap2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	HeapFieldPointsToHeapAux(c1, c2, heap1, field1, heap2, method).
+HeapFieldPointsToHeapField(c3, heap1, field1, heap2, field2, method) <-
+	ConstraintComposition[c1, c2] = c3,
+	HeapFieldPointsToHeapFieldAux(c1, c2, heap1, field1, heap2, field2, method).
+
+
+
+/**************** SUMMARY ****************/
+
+Summary:ArgumentFieldPointsToArgumentField(c, arg1, field1, arg2, field2, method) <-
+	VarFieldPointsToVarField(c, arg1, field1, arg2, field2, method),
+	FormalParam[_, method] = arg1, FormalParam[_, method] = arg2.
+
+Summary:ArgumentFieldPointsToHeap(c, arg, field, heap, method) <-
+	VarFieldPointsToHeap(c, arg, field, heap, method),
+	FormalParam[_, method] = arg.
+
+Summary:ArgumentFieldPointsToHeapField(c, arg1, field1, heap2, field2, method) <-
+	VarFieldPointsToHeapField(c, arg1, field1, heap2, field2, method),
+	FormalParam[_, method] = arg1.
+
+
+Summary:ReturnPointsToArgument(c, return, arg, method) <-
+	VarPointsToVar(c, return, arg, method),
+	FormalParam[_, method] = arg, Return[method] = return.
+
+Summary:ReturnPointsToArgumentField(c, return, arg, field, method) <-
+	VarPointsToVarField(c, return, arg, field, method),
+	FormalParam[_, method] = arg, Return[method] = return.
+
+Summary:ReturnPointsToHeap(c, return, heap, method) <-
+	VarPointsToHeap(c, return, heap, method),
+	Return[method] = return.
+
+Summary:ReturnPointsToHeapField(c, return, heap, field, method) <-
+	VarPointsToHeapField(c, return, heap, field, method),
+	Return[method] = return.
+
+
+Summary:HeapFieldPointsToArgument(c, heap, field, arg, method) <-
+	HeapFieldPointsToVar(c, heap, field, arg, method),
+	FormalParam[_, method] = arg.
+
+Summary:HeapFieldPointsToArgumentField(c, heap1, field1, arg2, field2, method) <-
+	HeapFieldPointsToVarField(c, heap1, field1, arg2, field2, method),
+	FormalParam[_, method] = arg2.
+
+Summary:HeapFieldPointsToHeap(c, heap1, field1, heap2, method) <-
+	HeapFieldPointsToHeap(c, heap1, field1, heap2, method).
+
+Summary:HeapFieldPointsToHeapField(c, heap1, field1, heap2, field2, method) <-
+	HeapFieldPointsToHeapField(c, heap1, field1, heap2, field2, method).
+
+
+Summary:LeakingHeap(c, heap, method) <-
+	Summary:ArgumentFieldPointsToHeap(c, _, _, heap, method).
+
+Summary:LeakingHeap(c, heap, method) <-
+	Summary:ReturnPointsToHeap(c, _, heap, method).
+
+Summary:LeakingHeap(c, heap2, method) <-
+	Summary:HeapFieldPointsToHeap(c, heap1, _, heap2, method),
+	Summary:LeakingHeap(c, heap1, method).
+
+Summary:LocalHeap(heap, method) <-
+	AssignHeapToVar(heap, _, method),
+	!Summary:LeakingHeap(_, heap, method).
+
+
+
+/**************** SUMMARY CHAINING ****************/
+
+Constraint(c), AtomicConstraint[base, dynamicClass, caller] = c,
+CallGraphEdge(invocation, caller, callee) <-
+	Invocation(invocation),
+	Invocation:InMethod[invocation] = caller,
+	Invocation:Base[invocation] = base,
+	Invocation:SimpleName[invocation] = sname,
+	Invocation:Descriptor[invocation] = descriptor,
+	Var:Class[base] = class, IsSubclass(dynamicClass, class),
+	Method:Lookup[sname, descriptor, dynamicClass] = callee.
+
+
+VarFieldPointsToVarFieldAux(c1, c2, param1, field1, param2, field2, caller) <-
+	AtomicConstraint[base, class, caller] = c2,
+	CallGraphEdge(invocation, caller, callee),
+	Invocation:Base[invocation] = base, Method:Class[callee] = class,
+	ActualParam[index1, invocation] = param1,
+	FormalParam[index1, callee] = arg1,
+	ActualParam[index2, invocation] = param2,
+	FormalParam[index2, callee] = arg2,
+	Summary:ArgumentFieldPointsToArgumentField(c1, arg1, field1, arg2, field2, callee).
+
+VarFieldPointsToHeapAux(c1, c2, param, field, heap, caller) <-
+	AtomicConstraint[base, class, caller] = c2,
+	CallGraphEdge(invocation, caller, callee),
+	Invocation:Base[invocation] = base, Method:Class[callee] = class,
+	ActualParam[index, invocation] = param,
+	FormalParam[index, callee] = arg,
+	Summary:ArgumentFieldPointsToHeap(c1, arg, field, heap, callee).
+
+VarFieldPointsToHeapFieldAux(c1, c2, param, field1, heap, field2, caller) <-
+	AtomicConstraint[base, class, caller] = c2,
+	CallGraphEdge(invocation, caller, callee),
+	Invocation:Base[invocation] = base, Method:Class[callee] = class,
+	ActualParam[index, invocation] = param,
+	FormalParam[index, callee] = arg,
+	Summary:ArgumentFieldPointsToHeapField(c1, arg, field1, heap, field2, callee).
+
+
+VarPointsToVarAux(c1, c2, var1, var2, caller) <-
+	AtomicConstraint[base, class, caller] = c2,
+	CallGraphEdge(invocation, caller, callee),
+	Invocation:Base[invocation] = base, Method:Class[callee] = class,
+	AssignReturnValueToVar(invocation, var1, caller),
+	Return[callee] = return,
+	FormalParam[index, callee] = arg,
+	ActualParam[index, invocation] = var2,
+	Summary:ReturnPointsToArgument(c1, return, arg, callee).
+
+VarPointsToVarFieldAux(c1, c2, var1, var2, field2, caller) <-
+	AtomicConstraint[base, class, caller] = c2,
+	CallGraphEdge(invocation, caller, callee),
+	Invocation:Base[invocation] = base, Method:Class[callee] = class,
+	AssignReturnValueToVar(invocation, var1, caller),
+	Return[callee] = return,
+	FormalParam[index, callee] = arg,
+	ActualParam[index, invocation] = var2,
+	Summary:ReturnPointsToArgumentField(c1, return, arg, field2, callee).
+
+VarPointsToHeapAux(c1, c2, var, heap, caller) <-
+	AtomicConstraint[base, class, caller] = c2,
+	CallGraphEdge(invocation, caller, callee),
+	Invocation:Base[invocation] = base, Method:Class[callee] = class,
+	AssignReturnValueToVar(invocation, var, caller),
+	Return[callee] = return,
+	Summary:ReturnPointsToHeap(c1, return, heap, callee).
+
+VarPointsToHeapFieldAux(c1, c2, var, heap, field, caller) <-
+	AtomicConstraint[base, class, caller] = c2,
+	CallGraphEdge(invocation, caller, callee),
+	Invocation:Base[invocation] = base, Method:Class[callee] = class,
+	AssignReturnValueToVar(invocation, var, caller),
+	Return[callee] = return,
+	Summary:ReturnPointsToHeapField(c1, return, heap, field, callee).

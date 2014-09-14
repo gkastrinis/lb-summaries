@@ -1,0 +1,93 @@
++Class(cA), +Class:Value(cA:"class A"),
++Class(cB), +Class:Value(cB:"class B"),
++Class(cD), +Class:Value(cD:"class D"),
++Class(cE), +Class:Value(cE:"class E"),
+
++Field(f_A), +Field:Value(f_A:"f_A"),
++Field(f_B), +Field:Value(f_B:"f_B"),
++Field(f_D), +Field:Value(f_D:"f_D"),
++Field(f_E), +Field:Value(f_E:"f_E"),
+
+
++SimpleName(r1), +SimpleName:Value(r1:"r1"),
++SimpleName(r2), +SimpleName:Value(r2:"r2"),
++SimpleName(main), +SimpleName:Value(main:"main"),
+
+
+/**** D::r1 ****/
++Method(r1_D), +Method:Value(r1_D:"D::r1"),
++Method:Class[r1_D] = cD, +Method:Lookup[r1, 0, cD] = r1_D,
++Var(r1_D_this), +Var:Value(r1_D_this:"D::r1_this"), +Var:Class[r1_D_this] = cD,
++Var(r1_D_argE), +Var:Value(r1_D_argE:"D::r1_argE"), +Var:Class[r1_D_argE] = cE,
++FormalParam[0, r1_D] = r1_D_this,
++FormalParam[1, r1_D] = r1_D_argE,
+
++Heap(h1_A), +Heap:Value(h1_A:"h1_A"), +Heap:Class[h1_A] = cA,
++Var(t1), +Var:Value(t1:"t1"), +Var:Class[t1] = cA,
++AssignHeapToVar(h1_A, t1, r1_D),
++AssignVarToField(t1, r1_D_argE, f_A, r1_D),
+
++Var(t2), +Var:Value(t2:"t2"), +Var:Class[t2] = cE,
++AssignVarToVar(r1_D_argE, t2, r1_D),
+//+AssignFieldToVar(r1_D_this, f_E, t2, r1_D),
+//+AssignVarToField(t1, t2, f_A, r1_D),
+
++Invocation(i1), +Invocation:Value(i1:"t2.r2(D)"),
++Invocation:InMethod[i1] = r1_D,
++Invocation:Base[i1] = t2,
++Invocation:SimpleName[i1] = r2, +Invocation:Descriptor[i1] = 0,
++ActualParam[0, i1] = t2, +ActualParam[1, i1] = r1_D_this,
+
+
+/**** E::r2 ****/
++Method(r2_E), +Method:Value(r2_E:"E::r2"),
++Method:Class[r2_E] = cE, +Method:Lookup[r2, 0, cE] = r2_E,
++Var(r2_E_this), +Var:Value(r2_E_this:"E::r2_this"), +Var:Class[r2_E_this] = cE,
++Var(r2_E_argD), +Var:Value(r2_E_argD:"E::r2_argD"), +Var:Class[r2_E_argD] = cD,
++FormalParam[0, r2_E] = r2_E_this,
++FormalParam[1, r2_E] = r2_E_argD,
+
++Heap(h2_B), +Heap:Value(h2_B:"h2_B"), +Heap:Class[h2_B] = cB,
++Var(t3), +Var:Value(t3:"t3"), +Var:Class[t3] = cB,
++AssignHeapToVar(h2_B, t3, r2_E),
++AssignVarToField(t3, r2_E_argD, f_B, r2_E),
+
++Var(t4), +Var:Value(t4:"t4"), +Var:Class[t4] = cD,
++AssignVarToVar(r2_E_argD, t4, r2_E),
+//+AssignFieldToVar(r2_E_this, f_D, t4, r2_E),
+//+AssignVarToField(t3, t4, f_B, r2_E),
+
++Invocation(i2), +Invocation:Value(i2:"t4.r1(E)"),
++Invocation:InMethod[i2] = r2_E,
++Invocation:Base[i2] = t4,
++Invocation:SimpleName[i2] = r1, +Invocation:Descriptor[i2] = 0,
++ActualParam[0, i2] = t4, +ActualParam[1, i2] = r2_E_this,
+
+
+/**** E::main ****/
++Method(main_E), +Method:Value(main_E:"E::main"),
++Method:Class[main_E] = cE, +Method:Lookup[main, 0, cE] = main_E,
++Var(main_E_this), +Var:Value(main_E_this:"E::main_this"), +Var:Class[main_E_this] = cE,
++Var(main_E_ret), +Var:Value(main_E_ret:"E::main_return"), +Var:Class[main_E_ret] = cD,
++FormalParam[0, main_E] = main_E_this,
++Return[main_E] = main_E_ret,
+
++Heap(h3_D), +Heap:Value(h3_D:"h3_D"), +Heap:Class[h3_D] = cD,
++Var(t5), +Var:Value(t5:"t5"), +Var:Class[t5] = cD,
++AssignHeapToVar(h3_D, t5, main_E),
+
++Heap(h4_E), +Heap:Value(h4_E:"h4_E"), +Heap:Class[h4_E] = cE,
++Var(t6), +Var:Value(t6:"t6"), +Var:Class[t6] = cE,
++AssignHeapToVar(h4_E, t6, main_E),
+
++Invocation(i3), +Invocation:Value(i3:"t5.r1(E)"),
++Invocation:InMethod[i3] = main_E,
++Invocation:Base[i3] = t5,
++Invocation:SimpleName[i3] = r1, +Invocation:Descriptor[i3] = 0,
++ActualParam[0, i3] = t5, +ActualParam[1, i3] = t6,
+
++AssignVarToVar(t5, main_E_ret, main_E),
+
+
+
++Var(end), +Var:Value(end:"end").

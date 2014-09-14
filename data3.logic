@@ -1,0 +1,59 @@
++Class(cA), +Class:Value(cA:"class A"),
++Class(cD), +Class:Value(cD:"class D"),
++Class(cE), +Class:Value(cE:"class E"),
+
++Field(f_A), +Field:Value(f_A:"f_A"),
+
+
++SimpleName(rec), +SimpleName:Value(rec:"rec"),
++SimpleName(main), +SimpleName:Value(main:"main"),
+
+
+/**** D::rec ****/
++Method(rec_D), +Method:Value(rec_D:"D::rec"),
++Method:Class[rec_D] = cD, +Method:Lookup[rec, 0, cD] = rec_D,
++Var(rec_D_this), +Var:Value(rec_D_this:"D::rec_this"), +Var:Class[rec_D_this] = cD,
++Var(rec_D_argD), +Var:Value(rec_D_argD:"D::rec_argD"), +Var:Class[rec_D_argD] = cD,
++FormalParam[0, rec_D] = rec_D_this,
++FormalParam[1, rec_D] = rec_D_argD,
+
++Heap(h1_A), +Heap:Value(h1_A:"h1_A"), +Heap:Class[h1_A] = cA,
++Var(t1), +Var:Value(t1:"t1"), +Var:Class[t1] = cA,
++AssignHeapToVar(h1_A, t1, rec_D),
+
++AssignVarToField(t1, rec_D_argD, f_A, rec_D),
+
++Invocation(i1), +Invocation:Value(i1:"rec_D_argD.rec(rec_D_this)"),
++Invocation:InMethod[i1] = rec_D,
++Invocation:Base[i1] = rec_D_argD,
++Invocation:SimpleName[i1] = rec, +Invocation:Descriptor[i1] = 0,
++ActualParam[0, i1] = rec_D_argD, +ActualParam[1, i1] = rec_D_this,
+
+
+/**** E::main ****/
++Method(main_E), +Method:Value(main_E:"E::main"),
++Method:Class[main_E] = cE, +Method:Lookup[main, 0, cE] = main_E,
++Var(main_E_this), +Var:Value(main_E_this:"E::main_this"), +Var:Class[main_E_this] = cE,
++Var(main_E_ret), +Var:Value(main_E_ret:"E::main_return"), +Var:Class[main_E_ret] = cD,
++FormalParam[0, main_E] = main_E_this,
++Return[main_E] = main_E_ret,
+
++Heap(h2_D), +Heap:Value(h2_D:"h2_D"), +Heap:Class[h2_D] = cD,
++Var(t2), +Var:Value(t2:"t2"), +Var:Class[t2] = cD,
++AssignHeapToVar(h2_D, t2, main_E),
+
++Heap(h3_D), +Heap:Value(h3_D:"h3_D"), +Heap:Class[h3_D] = cD,
++Var(t3), +Var:Value(t3:"t3"), +Var:Class[t3] = cD,
++AssignHeapToVar(h3_D, t3, main_E),
+
++Invocation(i2), +Invocation:Value(i2:"t2.rec(t3)"),
++Invocation:InMethod[i2] = main_E,
++Invocation:Base[i2] = t2,
++Invocation:SimpleName[i2] = rec, +Invocation:Descriptor[i2] = 0,
++ActualParam[0, i2] = t2, +ActualParam[1, i2] = t3,
+
++AssignVarToVar(t2, main_E_ret, main_E),
+
+
+
++Var(end), +Var:Value(end:"end").

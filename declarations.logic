@@ -1,0 +1,98 @@
+/**************** FACTS ****************/
+
+Var(x), Var:Value(x:s) -> string(s).
+Heap(x), Heap:Value(x:s) -> string(s).
+Field(x), Field:Value(x:s) -> string(s).
+Method(x), Method:Value(x:s) -> string(s).
+SimpleName(x), SimpleName:Value(x:s) -> string(s).
+Class(x), Class:Value(x:s) -> string(s).
+Invocation(x), Invocation:Value(x:s) -> string(s).
+
+IsSubclass(class, class) -> Class(class).
+Var:Class[var] = class -> Var(var), Class(class).
+Heap:Class[heap] = class -> Heap(heap), Class(class).
+Field:Class[field] = class -> Field(field), Class(class).
+Method:Class[method] = class -> Method(method), Class(class).
+FormalParam[index, method] = var -> int[32](index), Method(method), Var(var).
+ActualParam[index, invocation] = var -> int[32](index), Invocation(invocation), Var(var).
+Return[method] = var -> Method(method), Var(var).
+Method:Lookup[simplename, descriptor, class] = method ->
+	SimpleName(simplename), int[32](descriptor), Class(class), Method(method).
+Invocation:InMethod[invocation] = method -> Invocation(invocation), Method(method).
+Invocation:Base[invocation] = base -> Invocation(invocation), Var(base).
+Invocation:SimpleName[invocation] = simplename -> Invocation(invocation), SimpleName(simplename).
+Invocation:Descriptor[invocation] = descriptor -> Invocation(invocation), int[32](descriptor).
+
+/* t1 = t2 */
+AssignVarToVar(var, var, method) -> Var(var), Method(method).
+/* t1 = t2.b */
+AssignFieldToVar(var, field, var, method) -> Field(field), Var(var), Method(method).
+/* t1.b = t2 */
+AssignVarToField(var, var, field, method) -> Field(field), Var(var), Method(method).
+/* t1 = new A() */
+AssignHeapToVar(heap, var, method) -> Var(var), Heap(heap), Method(method).
+/* t1 = t2.meth(...) */
+AssignReturnValueToVar(invocation, var, method) -> Invocation(invocation), Var(var), Method(method).
+
+
+/**************** RULES ****************/
+
+Constraint(c) -> .
+lang:entity(`Constraint).
+lang:ordered(`Constraint).
+lang:physical:storageModel[`Constraint]="ScalableSparse".
+lang:physical:capacity[`Constraint] = 512.
+
+EmptyConstraint[] = c -> Constraint(c).
+lang:skolem(`EmptyConstraint).
+AtomicConstraint[var, class, method] = c -> Var(var), Class(class), Method(method), Constraint(c).
+lang:skolem(`AtomicConstraint).
+CompositeConstraint[c, c] = c -> Constraint(c).
+lang:skolem(`CompositeConstraint).
+ToCompose(c, c) -> Constraint(c).
+ConstraintComposition[c, c] = c -> Constraint(c).
+
+VarPointsToVar(c, var, var, method) -> Constraint(c), Var(var), Method(method).
+VarPointsToVarField(c, var, var, field, method) -> Constraint(c), Var(var), Field(field), Method(method).
+VarPointsToHeap(c, var, heap, method) -> Constraint(c), Var(var), Heap(heap), Method(method).
+VarPointsToHeapField(c, var, heap, field, method) -> Constraint(c), Var(var), Heap(heap), Field(field), Method(method).
+
+VarFieldPointsToVar(c, var, field, var, method) -> Constraint(c), Var(var), Field(field), Method(method).
+VarFieldPointsToVarField(c, var, field, var, field, method) -> Constraint(c), Var(var), Field(field), Method(method).
+VarFieldPointsToHeap(c, var, field, heap, method) -> Constraint(c), Var(var), Field(field), Heap(heap), Method(method).
+VarFieldPointsToHeapField(c, var, field, heap, field, method) -> Constraint(c), Var(var), Field(field), Heap(heap), Method(method).
+
+HeapFieldPointsToVar(c, heap, field, var, method) -> Constraint(c), Heap(heap), Field(field), Var(var), Method(method).
+HeapFieldPointsToVarField(c, heap, field, var, field, method) -> Constraint(c), Heap(heap), Field(field), Var(var), Method(method).
+HeapFieldPointsToHeap(c, heap, field, heap, method) -> Constraint(c), Heap(heap), Field(field), Method(method).
+HeapFieldPointsToHeapField(c, heap, field, heap, field, method) -> Constraint(c), Heap(heap), Field(field), Method(method).
+
+VarPointsToVarAux(c, c, var, var, method) -> Constraint(c), Var(var), Method(method).
+VarPointsToVarFieldAux(c, c, var, var, field, method) -> Constraint(c), Var(var), Field(field), Method(method).
+VarPointsToHeapAux(c, c, var, heap, method) -> Constraint(c), Var(var), Heap(heap), Method(method).
+VarPointsToHeapFieldAux(c, c, var, heap, field, method) -> Constraint(c), Var(var), Heap(heap), Field(field), Method(method).
+
+VarFieldPointsToVarAux(c, c, var, field, var, method) -> Constraint(c), Var(var), Field(field), Method(method).
+VarFieldPointsToVarFieldAux(c, c, var, field, var, field, method) -> Constraint(c), Var(var), Field(field), Method(method).
+VarFieldPointsToHeapAux(c, c, var, field, heap, method) -> Constraint(c), Var(var), Field(field), Heap(heap), Method(method).
+VarFieldPointsToHeapFieldAux(c, c, var, field, heap, field, method) -> Constraint(c), Var(var), Field(field), Heap(heap), Method(method).
+
+HeapFieldPointsToVarAux(c, c, heap, field, var, method) -> Constraint(c), Heap(heap), Field(field), Var(var), Method(method).
+HeapFieldPointsToVarFieldAux(c, c, heap, field, var, field, method) -> Constraint(c), Heap(heap), Field(field), Var(var), Method(method).
+HeapFieldPointsToHeapAux(c, c, heap, field, heap, method) -> Constraint(c), Heap(heap), Field(field), Method(method).
+HeapFieldPointsToHeapFieldAux(c, c, heap, field, heap, field, method) -> Constraint(c), Heap(heap), Field(field), Method(method).
+
+
+Summary:ArgumentFieldPointsToArgumentField(c, arg, field, arg, field, method) -> Constraint(c), Var(arg), Field(field), Method(method).
+Summary:ArgumentFieldPointsToHeap(c, arg, field, heap, method) -> Constraint(c), Var(arg), Field(field), Heap(heap), Method(method).
+Summary:ArgumentFieldPointsToHeapField(c, arg, field, heap, field, method) -> Constraint(c), Var(arg), Field(field), Heap(heap), Method(method).
+Summary:ReturnPointsToArgument(c, return, arg, method) -> Constraint(c), Var(return), Var(arg), Method(method).
+Summary:ReturnsPointsToArgumentField(c, return, arg, field, method) -> Constraint(c), Var(return), Var(arg), Field(field), Method(method).
+Summary:ReturnPointsToHeap(c, return, heap, method) -> Constraint(c), Var(return), Heap(heap), Method(method).
+Summary:ReturnPointsToHeapField(c, return, heap, field, method) -> Constraint(c), Var(return), Heap(heap), Field(field), Method(method).
+Summary:HeapFieldPointsToArgument(c, heap, field, arg, method) -> Constraint(c), Heap(heap), Field(field), Var(arg), Method(method).
+Summary:HeapFieldPointsToArgumentField(c, heap, field, arg, field, method) -> Constraint(c), Heap(heap), Field(field), Var(arg), Method(method).
+Summary:HeapFieldPointsToHeap(c, heap, field, heap, method) -> Constraint(c), Heap(heap), Field(field), Method(method).
+Summary:HeapFieldPointsToHeapField(c, heap, field, heap, field, method) -> Constraint(c), Heap(heap), Field(field), Method(method).
+
+Summary:LeakingHeap(c, heap, method) -> Constraint(c), Heap(heap), Method(method).

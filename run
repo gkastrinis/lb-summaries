@@ -1,0 +1,44 @@
+#! /bin/bash
+
+if test $# != 1 ; then
+	echo 'Need to provide data filename'
+	exit
+fi
+dataFile=$1
+
+db=/tmp/`whoami`/summariesDB
+rm -rf $db
+
+bloxbatch -db $db -create
+bloxbatch -db $db -addBlock -file declarations.logic
+bloxbatch -db $db -addBlock -file rules.logic
+bloxbatch -db $db -execute  -file $dataFile
+bloxbatch -db $db -execute  -file EDB_Rules.logic
+
+for predicate in `bloxbatch -db $db -list 'Summary' | tail -n +2`
+do
+	echo $predicate
+	bloxbatch -db $db -query $predicate
+done
+
+# debug output; print each command that is run
+set -x
+# debug queries
+#bloxbatch -db $db -query VarPointsToVar
+#bloxbatch -db $db -query VarPointsToVarField
+#bloxbatch -db $db -query VarPointsToHeap
+#bloxbatch -db $db -query VarPointsToHeapField
+
+#bloxbatch -db $db -query VarFieldPointsToVar
+#bloxbatch -db $db -query VarFieldPointsToVarField
+#bloxbatch -db $db -query VarFieldPointsToHeap
+#bloxbatch -db $db -query VarFieldPointsToHeapField
+
+#bloxbatch -db $db -query HeapFieldPointsToVar
+#bloxbatch -db $db -query HeapFieldPointsToVarField
+#bloxbatch -db $db -query HeapFieldPointsToHeap
+#bloxbatch -db $db -query HeapFieldPointsToHeapField
+
+#bloxbatch -db $db -query Constraint
+#bloxbatch -db $db -query AtomicConstraint
+#bloxbatch -db $db -query CompositeConstraint
